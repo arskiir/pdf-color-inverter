@@ -23,6 +23,11 @@ MAIN_FILE_DIR = os.path.dirname(MAIN_FILE_PATH)
 
 def main():
     os.system("title PDF-ColorInverter")
+    print(
+        "Disclaimer.\n"
+        "The output pdf will be a pdf of images only.\n"
+        "The texts and other things will become uninteractive.\n"
+    )
     dpi = ask_for_inverting_mode()
     pdf_paths = prompt_file_path()
     targeted_file_dir = os.path.dirname(pdf_paths[0])
@@ -34,16 +39,17 @@ def main():
     for path in pdf_paths:
         invert_pdf(path, targeted_file_dir, output_dir, dpi)
 
-    explore(targeted_file_dir)
+    if wait_key("Press F to open the output folder.").lower() == "f":
+        explore(output_dir)
 
 
 def ask_for_inverting_mode():
     dpi = 100
     selected_choice = wait_key(
-        "1: First time inverting.\n2: Invert *back* to original color.\n(1, 2)?: ",
+        "1: First time inverting (3x the size to preserve quality).\n2: Subsequent inverting (the size is roughly the same).\n(1, 2)?: ",
         end="",
     )
-    print(selected_choice)
+    print(selected_choice + '\n')
     if selected_choice == "1":
         dpi = 200
     return dpi
@@ -54,7 +60,7 @@ def invert_pdf(pdf_path: str, targeted_file_dir: str, output_dir: str, dpi: int)
     print(f'=> Inverting "{file_name}"')
     print(">> Converting to images, this may take a while.")
 
-    images = convert_pdf_to_images(pdf_path, dpi)
+    images: List[Image.Image] = convert_pdf_to_images(pdf_path, dpi)
     new_file_name = file_name.split(".pdf")[0] + " (inverted).pdf"
     images_bytes = invert_images(images)
     print(">> Converting images back to pdf, this may take a while.")
@@ -117,7 +123,7 @@ def convert_pdf_to_images(file_path: str, dpi: int) -> List[Image.Image]:
     )
     return convert_from_path(
         file_path,
-        dpi=200,
+        dpi=dpi,
         poppler_path=poppler_path,
         thread_count=4,
     )
