@@ -13,7 +13,7 @@ try:
 except ImportError:
     print("Installing dependencies")
     os.system("pip install -r requirements.txt")
-    # os.execv(sys.argv[0], sys.argv)
+    os.execv(sys.argv[0], sys.argv)
 
 from utils import explore, wait_key
 
@@ -22,20 +22,8 @@ MAIN_FILE_DIR = os.path.dirname(MAIN_FILE_PATH)
 
 
 def main():
-    dpi = 200
-    # if (
-    #     input(
-    #         "First time inverting, enter 1.\nInverting *back* to original color, enter 2."
-    #     )
-    #     == "1"
-    # ):
-    #     dpi = 200
-    #     input(
-    #         "WARNING.\n"
-    #         "This converts pdf to pdf of *images*, meaning you can no longer interact with texts.\n"
-    #         "Enter any key to continue.\n"
-    #     )
-
+    os.system("title PDF-ColorInverter")
+    dpi = ask_for_inverting_mode()
     pdf_paths = prompt_file_path()
     targeted_file_dir = os.path.dirname(pdf_paths[0])
     os.chdir(targeted_file_dir)
@@ -47,6 +35,18 @@ def main():
         invert_pdf(path, targeted_file_dir, output_dir, dpi)
 
     explore(targeted_file_dir)
+
+
+def ask_for_inverting_mode():
+    dpi = 100
+    selected_choice = wait_key(
+        "1: First time inverting.\n2: Invert *back* to original color.\n(1, 2)?: ",
+        end="",
+    )
+    print(selected_choice)
+    if selected_choice == "1":
+        dpi = 200
+    return dpi
 
 
 def invert_pdf(pdf_path: str, targeted_file_dir: str, output_dir: str, dpi: int):
@@ -104,7 +104,10 @@ def invert_images(images: List[Image.Image]):
 
 def get_bytes(img: Image.Image):
     with io.BytesIO() as buffer:
-        img.save(buffer, format="png")
+        img.save(
+            buffer,
+            format="png",
+        )
         return buffer.getvalue()
 
 
