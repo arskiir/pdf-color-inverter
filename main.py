@@ -27,7 +27,7 @@ def main():
         "Disclaimer.\n"
         "The output pdf will be a pdf of images only.\n"
         "The texts and other things will become uninteractive.\n"
-        "Not recommended to \"chain\" the invertion as file sizes will get bigger and bigger.\n"
+        "Not recommended to \"chain\" the inversion as file sizes will get bigger and bigger.\n"
     )
     dpi = ask_for_inverting_mode()
     pdf_paths = prompt_file_path()
