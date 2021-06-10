@@ -11,7 +11,7 @@ If you want to permanently invert the colour of a pdf not just in read-only mode
 3. Run `python main.py` or double click it. (You may have to run it a few times for the auto dependency installation to get a hold of itself.)
 4. Select the inversion mode
    - If you are inverting it for the first time, select 1.
-   - If you are inverting for the second or more time, select 2.
+   - If you are inverting an _inverted_ pdf back to its original colours, select 2.
 5. Select one or more pdf files you want to invert
 6. ???
 7. _Profit_
@@ -20,4 +20,4 @@ If you want to permanently invert the colour of a pdf not just in read-only mode
 
 - The output pdf will be a pdf of _images_ only.
 - The texts and other things will become _uninteractive_.
-- Not recommended to _chain_ the inversion as file sizes will get bigger and bigger.
+- Not recommended to _chain_ the inversion too much as file sizes only get bigger and bigger.
