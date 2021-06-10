@@ -23,6 +23,7 @@ MAIN_FILE_DIR = os.path.dirname(MAIN_FILE_PATH)
 
 def main():
     pdf_paths = prompt_file_path()
+    print("Warning: this converts pdf to pdf of *images*, meaning you can no longer interact with texts.")
     targeted_file_dir = os.path.dirname(pdf_paths[0])
     os.chdir(targeted_file_dir)
     output_dir = os.path.join(targeted_file_dir, "inverted pdf(s)")
@@ -98,11 +99,9 @@ def convert_pdf_to_images(file_path: str) -> List[Image.Image]:
     poppler_path = os.path.join(
         MAIN_FILE_DIR, "dependencies\\poppler-21.03.0\\Library\\bin"
     )
-    a4_200dpi_size = (1654, 2339)
     return convert_from_path(
         file_path,
         dpi=200,
-        size=a4_200dpi_size,
         poppler_path=poppler_path,
         thread_count=4,
     )
