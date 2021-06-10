@@ -22,7 +22,7 @@ MAIN_FILE_DIR = os.path.dirname(MAIN_FILE_PATH)
 
 
 def main():
-    # dpi = 100
+    dpi = 200
     # if (
     #     input(
     #         "First time inverting, enter 1.\nInverting *back* to original color, enter 2."
