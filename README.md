@@ -14,10 +14,10 @@ If you want to permanently invert the colour of a pdf not just in read-only mode
    - If you are inverting for the second or more time, select 2.
 5. Select one or more pdf files you want to invert
 6. ???
-7. Profit
+7. _Profit_
 
 ## Disclaimer ⚠️
 
-- The output pdf will be a pdf of images only.
-- The texts and other things will become uninteractive.
-- Not recommended to "chain" the inversion as file sizes will get bigger and bigger.
+- The output pdf will be a pdf of _images_ only.
+- The texts and other things will become _uninteractive_.
+- Not recommended to _chain_ the inversion as file sizes will get bigger and bigger.
