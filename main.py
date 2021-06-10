@@ -13,7 +13,7 @@ try:
 except ImportError:
     print("Installing dependencies")
     os.system("pip install -r requirements.txt")
-    os.execv(sys.argv[0], sys.argv)
+    # os.execv(sys.argv[0], sys.argv)
 
 from utils import explore, wait_key
 
@@ -22,8 +22,21 @@ MAIN_FILE_DIR = os.path.dirname(MAIN_FILE_PATH)
 
 
 def main():
+    # dpi = 100
+    # if (
+    #     input(
+    #         "First time inverting, enter 1.\nInverting *back* to original color, enter 2."
+    #     )
+    #     == "1"
+    # ):
+    #     dpi = 200
+    #     input(
+    #         "WARNING.\n"
+    #         "This converts pdf to pdf of *images*, meaning you can no longer interact with texts.\n"
+    #         "Enter any key to continue.\n"
+    #     )
+
     pdf_paths = prompt_file_path()
-    print("Warning: this converts pdf to pdf of *images*, meaning you can no longer interact with texts.")
     targeted_file_dir = os.path.dirname(pdf_paths[0])
     os.chdir(targeted_file_dir)
     output_dir = os.path.join(targeted_file_dir, "inverted pdf(s)")
@@ -31,17 +44,17 @@ def main():
 
     # TODO use thread here
     for path in pdf_paths:
-        invert_pdf(path, targeted_file_dir, output_dir)
+        invert_pdf(path, targeted_file_dir, output_dir, dpi)
 
     explore(targeted_file_dir)
 
 
-def invert_pdf(pdf_path: str, targeted_file_dir: str, output_dir: str):
+def invert_pdf(pdf_path: str, targeted_file_dir: str, output_dir: str, dpi: int):
     _, file_name = os.path.split(pdf_path)
     print(f'=> Inverting "{file_name}"')
     print(">> Converting to images, this may take a while.")
 
-    images = convert_pdf_to_images(pdf_path)
+    images = convert_pdf_to_images(pdf_path, dpi)
     new_file_name = file_name.split(".pdf")[0] + " (inverted).pdf"
     images_bytes = invert_images(images)
     print(">> Converting images back to pdf, this may take a while.")
@@ -95,7 +108,7 @@ def get_bytes(img: Image.Image):
         return buffer.getvalue()
 
 
-def convert_pdf_to_images(file_path: str) -> List[Image.Image]:
+def convert_pdf_to_images(file_path: str, dpi: int) -> List[Image.Image]:
     poppler_path = os.path.join(
         MAIN_FILE_DIR, "dependencies\\poppler-21.03.0\\Library\\bin"
     )
