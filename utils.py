@@ -1,7 +1,6 @@
 import os
 import subprocess
 
-
 if os.name == "nt":
     import msvcrt
 else:
