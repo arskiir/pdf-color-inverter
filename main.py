@@ -20,6 +20,7 @@ from utils import explore, wait_key
 MAIN_FILE_PATH = os.path.abspath(__file__)
 MAIN_FILE_DIR = os.path.dirname(MAIN_FILE_PATH)
 
+# TODO converts 10 pages at a time to not monopolize the poor RAM
 
 def main():
     os.system("title PDF-ColorInverter")
@@ -51,6 +52,7 @@ def ask_for_inverting_mode():
         end="",
     )
     print(selected_choice + "\n")
+    # TODO add an option for 300 dpi, yolo
     if selected_choice == "1":
         dpi = 200
     return dpi
