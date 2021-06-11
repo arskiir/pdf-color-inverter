@@ -9,6 +9,7 @@ else:
 
 FILEBROWSER_PATH = os.path.join(os.getenv("WINDIR"), "explorer.exe")
 
+
 def explore(path):
     # explorer would choke on forward slashes
     path = os.path.normpath(path)
@@ -44,3 +45,10 @@ def wait_key(prompt=None, end="\n"):
             termios.tcsetattr(fd, termios.TCSAFLUSH, oldterm)
 
     return result if type(result) == str else result.decode("utf-8")
+
+
+def add_this_arg(func):
+    def wrapped(*args, **kwargs):
+        return func(wrapped, *args, **kwargs)
+
+    return wrapped

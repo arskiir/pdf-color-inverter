@@ -2,8 +2,9 @@ import io
 import os
 import sys
 import tkinter as tk
+import threading
 from tkinter import filedialog
-from typing import List
+from typing import Dict, List
 
 try:
     import img2pdf
@@ -15,12 +16,13 @@ except ImportError:
     os.system("pip install -r requirements.txt")
     os.execv(sys.argv[0], sys.argv)
 
-from utils import explore, wait_key
+from utils import explore, wait_key, add_this_arg
 
 MAIN_FILE_PATH = os.path.abspath(__file__)
 MAIN_FILE_DIR = os.path.dirname(MAIN_FILE_PATH)
 
 # TODO converts 10 pages at a time to not monopolize the poor RAM
+
 
 def main():
     os.system("title PDF-ColorInverter")
@@ -64,20 +66,32 @@ def invert_pdf(pdf_path: str, output_dir: str, dpi: int):
     print(">> Converting to images, this may take a while.")
 
     images: List[Image.Image] = convert_pdf_to_images(pdf_path, dpi)
-    images_bytes = invert_images(images)
+    number_of_images = len(images)
+    images_bytes: Dict[int, bytes] = invert_images(images, number_of_images)
     print(">> Converting images back to pdf, this may take a while.")
-    convert_images_to_pdf(images_bytes, file_name, output_dir)
+    convert_images_to_pdf(
+        get_bytes_sorted(images_bytes, number_of_images), file_name, output_dir
+    )
 
     print(">>> " + os.path.join(output_dir, file_name) + "\n")
 
 
+def get_bytes_sorted(
+    images_bytes: Dict[int, bytes], number_of_images: int
+) -> List[bytes]:
+    result = []
+    for image_order in range(1, number_of_images + 1):
+        result.append(images_bytes[image_order])
+    return result
+
+
 def convert_images_to_pdf(
-    images_bytes: List[bytes], file_name: str, output_dir: str
+    sorted_images_bytes: List[bytes], file_name: str, output_dir: str
 ):
     """Inverts Pillow Images and save them as a single PDF
 
     Args:
-        images (list[bytes]): list of Pillow Images as bytes waiting to be inverted
+        images_bytes (list[bytes]): list of Pillow Images as bytes waiting to be inverted
         file_name (str): The new name of the output file
         output_dir (str): the output directory path
     """
@@ -85,29 +99,39 @@ def convert_images_to_pdf(
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
     new_file_abspath = os.path.join(output_dir, file_name)
+
     with open(new_file_abspath, "wb") as f:
-        f.write(img2pdf.convert(images_bytes))
+        f.write(img2pdf.convert(sorted_images_bytes))
 
 
-def invert_images(images: List[Image.Image]):
+@add_this_arg
+def invert_images(this, images: List[Image.Image], number_of_images: int) -> Dict[int, bytes]:
     """Inverts color of the images and converts them to bytes
 
     Args:
         images (List[Image.Image]): list of PIL images
+        number_of_images: int
 
     Returns:
         List[bytes]: list of bytes of inverted images
     """
 
-    images_bytes = []
-    number_of_images = len(images)
+    images_bytes = {}
 
     # TODO use thread here, we can store the bytes results from threads in a dict then use a loop to only append them to images_bytes list
+    this.inverted_count = 0
     for i, image in enumerate(images, 1):
-        inverted_image = PIL.ImageOps.invert(image)  # 300-dpi A4 size
-        print(f"> inverted {i}/{number_of_images} images")
-        images_bytes.append(get_bytes(inverted_image))
+        get_inverted_image_bytes(
+            images_bytes, number_of_images, i, image
+        )
     return images_bytes
+
+
+def get_inverted_image_bytes(images_bytes, number_of_images, i, image):
+    inverted_image = PIL.ImageOps.invert(image)  # 300-dpi A4 size
+    images_bytes[i] = get_bytes(inverted_image)
+    invert_images.inverted_count += 1
+    print(f"> inverted {invert_images.inverted_count}/{number_of_images} images")
 
 
 def get_bytes(img: Image.Image):
