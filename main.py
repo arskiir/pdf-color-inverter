@@ -117,13 +117,11 @@ def invert_images(this, images: List[Image.Image], number_of_images: int) -> Dic
     """
 
     images_bytes = {}
-
-    # TODO use thread here, we can store the bytes results from threads in a dict then use a loop to only append them to images_bytes list
     this.inverted_count = 0
     for i, image in enumerate(images, 1):
-        get_inverted_image_bytes(
-            images_bytes, number_of_images, i, image
-        )
+        t = threading.Thread(target=get_inverted_image_bytes, args=(images_bytes, number_of_images, i, image))
+        t.start()
+        t.join() # wait for all threads to finish then return
     return images_bytes
 
 
