@@ -9,7 +9,7 @@ from typing import Dict, List
 try:
     import img2pdf
     import PIL.ImageOps
-    from pdf2image import convert_from_path
+    from pdf2image import convert_from_path, pdfinfo_from_path
     from PIL import Image
 except ImportError:
     print("Installing dependencies")
@@ -21,7 +21,9 @@ from utils import add_this_arg, explore, wait_key
 MAIN_FILE_PATH = os.path.abspath(__file__)
 MAIN_FILE_DIR = os.path.dirname(MAIN_FILE_PATH)
 
-# TODO converts 10 pages at a time to not monopolize the poor RAM
+POPPLER_PATH = os.path.join(
+    MAIN_FILE_DIR, "dependencies\\poppler-21.03.0\\Library\\bin"
+)
 
 
 def main():
@@ -40,6 +42,18 @@ def main():
     print(f"---------> Inverting {len(pdf_paths)} pdf file(s).\n")
 
     for pdf in pdf_paths:
+        # info = pdfinfo_from_path(pdf, userpw=None, poppler_path=POPPLER_PATH)
+
+        # maxPages = info["Pages"]
+        # for page in range(1, maxPages + 1, 10):
+        #     convert_from_path(
+        #         pdf,
+        #         dpi=200,
+        #         first_page=page,
+        #         last_page=min(page + 10 - 1, maxPages),
+        #     )
+
+        # TODO change this to comply with the merging pdf method
         invert_pdf(pdf, output_dir, dpi)
 
     if wait_key("Press F to open the output folder.").lower() == "f":
@@ -149,13 +163,10 @@ def get_bytes(img: Image.Image):
 
 
 def convert_pdf_to_images(file_path: str, dpi: int) -> List[Image.Image]:
-    poppler_path = os.path.join(
-        MAIN_FILE_DIR, "dependencies\\poppler-21.03.0\\Library\\bin"
-    )
     return convert_from_path(
         file_path,
         dpi=dpi,
-        poppler_path=poppler_path,
+        poppler_path=POPPLER_PATH,
         thread_count=4,
     )
 
