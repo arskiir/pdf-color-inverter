@@ -37,7 +37,6 @@ def main():
     output_dir = os.path.join(os.getcwd(), "inverted pdf(s)")
     print(f"---------> Inverting {len(pdf_paths)} pdf file(s).\n")
 
-    # TODO use thread here
     for pdf in pdf_paths:
         invert_pdf(pdf, output_dir, dpi)
 
