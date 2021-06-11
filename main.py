@@ -30,7 +30,7 @@ def main():
         "The texts and other things will become uninteractive.\n"
         'Not recommended to "chain" the inversion as file sizes will get bigger and bigger.\n'
     )
-    dpi = ask_for_inverting_mode()
+    dpi = ask_for_inversion_mode()
     pdf_paths = prompt_file_path()
     targeted_file_dir = os.path.dirname(pdf_paths[0])
     os.chdir(targeted_file_dir)
@@ -45,16 +45,17 @@ def main():
         explore(output_dir)
 
 
-def ask_for_inverting_mode():
+def ask_for_inversion_mode():
     dpi = 100
     selected_choice = wait_key(
-        "1: First time inverting (3x the size to preserve quality).\n2: Subsequent inverting (the size is roughly the same).\n(1, 2)?: ",
+        "1: First time inverting (3x the size to preserve quality).\n2: Subsequent inverting (the size is roughly the same).\n3: HigH QuaLIty IS mY thinG. yolo\n(1, 2)?: ",
         end="",
     )
     print(selected_choice + "\n")
-    # TODO add an option for 300 dpi, yolo
     if selected_choice == "1":
         dpi = 200
+    elif selected_choice == "3":
+        dpi = 300
     return dpi
 
 
