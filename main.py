@@ -27,18 +27,18 @@ def main():
         "Disclaimer.\n"
         "The output pdf will be a pdf of images only.\n"
         "The texts and other things will become uninteractive.\n"
-        "Not recommended to \"chain\" the inversion as file sizes will get bigger and bigger.\n"
+        'Not recommended to "chain" the inversion as file sizes will get bigger and bigger.\n'
     )
     dpi = ask_for_inverting_mode()
     pdf_paths = prompt_file_path()
     targeted_file_dir = os.path.dirname(pdf_paths[0])
     os.chdir(targeted_file_dir)
-    output_dir = os.path.join(targeted_file_dir, "inverted pdf(s)")
+    output_dir = os.path.join(os.getcwd(), "inverted pdf(s)")
     print(f"---------> Inverting {len(pdf_paths)} pdf file(s).\n")
 
     # TODO use thread here
-    for path in pdf_paths:
-        invert_pdf(path, targeted_file_dir, output_dir, dpi)
+    for pdf in pdf_paths:
+        invert_pdf(pdf, output_dir, dpi)
 
     if wait_key("Press F to open the output folder.").lower() == "f":
         explore(output_dir)
@@ -50,40 +50,39 @@ def ask_for_inverting_mode():
         "1: First time inverting (3x the size to preserve quality).\n2: Subsequent inverting (the size is roughly the same).\n(1, 2)?: ",
         end="",
     )
-    print(selected_choice + '\n')
+    print(selected_choice + "\n")
     if selected_choice == "1":
         dpi = 200
     return dpi
 
 
-def invert_pdf(pdf_path: str, targeted_file_dir: str, output_dir: str, dpi: int):
+def invert_pdf(pdf_path: str, output_dir: str, dpi: int):
     _, file_name = os.path.split(pdf_path)
     print(f'=> Inverting "{file_name}"')
     print(">> Converting to images, this may take a while.")
 
     images: List[Image.Image] = convert_pdf_to_images(pdf_path, dpi)
-    new_file_name = file_name.split(".pdf")[0] + " (inverted).pdf"
     images_bytes = invert_images(images)
     print(">> Converting images back to pdf, this may take a while.")
-    convert_images_to_pdf(images_bytes, new_file_name, output_dir)
+    convert_images_to_pdf(images_bytes, file_name, output_dir)
 
-    print(">>> " + os.path.join(targeted_file_dir, new_file_name) + "\n")
+    print(">>> " + os.path.join(output_dir, file_name) + "\n")
 
 
 def convert_images_to_pdf(
-    images_bytes: List[bytes], new_file_name: str, output_dir: str
+    images_bytes: List[bytes], file_name: str, output_dir: str
 ):
     """Inverts Pillow Images and save them as a single PDF
 
     Args:
         images (list[bytes]): list of Pillow Images as bytes waiting to be inverted
-        new_file_name (str): The new name of the output file
+        file_name (str): The new name of the output file
         output_dir (str): the output directory path
     """
 
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
-    new_file_abspath = os.path.join(output_dir, new_file_name)
+    new_file_abspath = os.path.join(output_dir, file_name)
     with open(new_file_abspath, "wb") as f:
         f.write(img2pdf.convert(images_bytes))
 
