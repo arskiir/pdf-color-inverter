@@ -4,15 +4,18 @@ import tkinter as tk
 from tkinter import filedialog
 from typing import List
 
-try:
-    import img2pdf
-    import PIL.ImageOps
-    from pdf2image import convert_from_path, pdfinfo_from_path
-    from PIL import Image
-except ImportError:
-    print("Installing dependencies")
-    os.system("pip install -r requirements.txt")
-    os.execv(sys.argv[0], sys.argv)
+while True:
+    try:
+        import img2pdf
+        import PIL.ImageOps
+        from pdf2image import convert_from_path, pdfinfo_from_path
+        from PIL import Image
+    except ImportError:
+        print("Installing dependencies")
+        os.system("pip install -r requirements.txt")
+        os.execv(sys.argv[0], sys.argv)
+    else:
+        break
 
 from utils import explore, wait_key
 
