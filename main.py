@@ -23,14 +23,21 @@ POPPLER_PATH = os.path.join(
     MAIN_FILE_DIR, "dependencies\\poppler-21.03.0\\Library\\bin"
 )
 
-IS_USED_AS_LIB = len(sys.argv) > 1
+VERBOSE = True
+SHOW_OUT_DIR = False
 
 
 def main():
-    if IS_USED_AS_LIB:
+    global VERBOSE, SHOW_OUT_DIR
+
+    is_used_as_lib = len(sys.argv) > 1
+    if is_used_as_lib:
         # main.py 1 path_to_input.pdf ...
+        VERBOSE = "-verbose" in sys.argv
+        SHOW_OUT_DIR = "-show_out_dir" in sys.argv
+
         dpi = get_dpi_from_choice(sys.argv[1])
-        pdf_paths = sys.argv[2:]
+        pdf_paths = [f for f in sys.argv[2:] if f.endswith(".pdf")]
     else:
         dpi = ask_for_inversion_mode()
         pdf_paths = prompt_file_path()
@@ -47,7 +54,7 @@ def main():
     targeted_file_dir = os.path.dirname(pdf_paths[0])
     os.chdir(targeted_file_dir)
     output_dir = os.path.join(os.getcwd(), "inverted pdf(s)")
-    if not IS_USED_AS_LIB:
+    if VERBOSE:
         print(f"---------> Inverting {len(pdf_paths)} pdf file(s).\n")
 
     for pdf in pdf_paths:
@@ -55,11 +62,13 @@ def main():
         for file in images_file_names:
             os.remove(file)
 
-    if not IS_USED_AS_LIB:
-        if wait_key("Press F to open the output folder.").lower() == "f":
-            explore(output_dir)
-    else:
-        return 5  # denoting a successful task
+    if SHOW_OUT_DIR or (
+        not is_used_as_lib
+        and wait_key("Press F to open the output folder.").lower() == "f"
+    ):
+        explore(output_dir)
+
+    return 5  # denoting a successful task
 
 
 def ask_for_inversion_mode():
@@ -82,18 +91,18 @@ def get_dpi_from_choice(selected_choice: str):
 
 def invert_pdf(pdf_path: str, output_dir: str, dpi: int):
     _, file_name = os.path.split(pdf_path)
-    if not IS_USED_AS_LIB:
+    if VERBOSE:
         print(f'=> Inverting "{file_name}"')
         print(">> Converting to images, this may take a while.")
 
     info = pdfinfo_from_path(pdf_path, poppler_path=POPPLER_PATH)
     images_file_names = save_extracted_images_from_pdf(pdf_path, dpi, file_name, info)
     new_file_abspath = create_output_dir(file_name, output_dir)
-    if not IS_USED_AS_LIB:
+    if VERBOSE:
         print(">> Merging images back to pdf, this may take a while.")
 
     merge_images_to_pdf(new_file_abspath, images_file_names)
-    if not IS_USED_AS_LIB:
+    if VERBOSE:
         report_after_finished(info, new_file_abspath)
 
     return images_file_names
@@ -117,7 +126,7 @@ def save_extracted_images_from_pdf(pdf_path, dpi, file_name, info):
             PIL.ImageOps.invert(img).save(img_file_name, "PNG")
             images_file_names.append(img_file_name)
         count += number_of_images
-        if not IS_USED_AS_LIB:
+        if VERBOSE:
             print(f"> inverted {count}/{maxPages} images")
     return images_file_names
 
