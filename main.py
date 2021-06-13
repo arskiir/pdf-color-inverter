@@ -46,8 +46,8 @@ def main():
         for file in images_file_names:
             os.remove(file)
 
-    # if wait_key("Press F to open the output folder.").lower() == "f":
-    #     explore(output_dir)
+    if wait_key("Press F to open the output folder.").lower() == "f":
+        explore(output_dir)
 
 
 def ask_for_inversion_mode():
