@@ -13,7 +13,6 @@ while True:
     except ImportError:
         print("Installing dependencies")
         os.system("pip install -r requirements.txt")
-        os.execv(sys.argv[0], sys.argv)
     else:
         break
 
