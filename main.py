@@ -75,7 +75,7 @@ def main():
 
 def ask_for_inversion_mode():
     selected_choice = wait_key(
-        "1: First time inverting (3x the size to preserve quality).\n2: Subsequent inverting (the size is roughly the same).\n3: Quality comes first (6x the size)\n(1, 2)?: ",
+        "1: First time inverting (3 to 20? times the size to preserve quality).\n2: Subsequent inverting (the size is roughly the same).\n3: Quality comes first (6 to ??? times the size)\n(1, 2)?: ",
         end="",
     )
     print(selected_choice + "\n")
