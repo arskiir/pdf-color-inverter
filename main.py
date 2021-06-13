@@ -1,6 +1,7 @@
 import os
 import sys
 import tkinter as tk
+from concurrent.futures.thread import ThreadPoolExecutor
 from tkinter import filedialog
 from typing import List
 
@@ -39,7 +40,7 @@ def main():
         SHOW_OUT_DIR = "-show_out_dir" in sys.argv
 
         dpi = get_dpi_from_choice(sys.argv[1])
-        pdf_paths = [f for f in sys.argv[2:] if f.endswith(".pdf")]
+        pdf_paths = tuple(f for f in sys.argv[2:] if f.endswith(".pdf"))
     else:
         os.system("title PDF-ColorInverter")
         print(
@@ -50,7 +51,6 @@ def main():
         )
         dpi = ask_for_inversion_mode()
         pdf_paths = prompt_file_path()
-        print(pdf_paths[0])
 
     targeted_file_dir = os.path.dirname(pdf_paths[0])
     os.chdir(targeted_file_dir)
@@ -118,21 +118,25 @@ def save_extracted_images_from_pdf(pdf_path, dpi, info):
     count = 0
     pages_converted_once = 10
     base_temp_img_file_name = f"do not open - will be removed"
-    for page in range(1, maxPages + 1, pages_converted_once):
-        images: List[Image.Image] = convert_pdf_to_images(
-            pdf_path,
-            dpi,
-            first_page=page,
-            last_page=min(page + pages_converted_once - 1, maxPages),
-        )
-        number_of_images = len(images)
-        for i, img in enumerate(images, count + 1):
-            temp_img_file_name = base_temp_img_file_name + f" {i}.png"
-            PIL.ImageOps.invert(img).save(temp_img_file_name, "PNG")
-            to_be_removed_images_file_names.append(temp_img_file_name)
-        count += number_of_images
-        if VERBOSE:
-            print(f"> inverted {count}/{maxPages} images")
+    with ThreadPoolExecutor() as executor:
+        for page in range(1, maxPages + 1, pages_converted_once):
+            images: List[Image.Image] = convert_pdf_to_images(
+                pdf_path,
+                dpi,
+                first_page=page,
+                last_page=min(page + pages_converted_once - 1, maxPages),
+            )
+            number_of_images = len(images)
+            temp_img_files_names = [
+                base_temp_img_file_name + f" {i}.png" for i in range(number_of_images)
+            ]
+            inverted_images = executor.map(PIL.ImageOps.invert, images)
+            for img, name in zip(inverted_images, temp_img_files_names):
+                img.save(name, "PNG")
+            to_be_removed_images_file_names.extend(temp_img_files_names)
+            count += number_of_images
+            if VERBOSE:
+                print(f"> inverted {count}/{maxPages} images")
     return to_be_removed_images_file_names
 
 
@@ -145,7 +149,7 @@ def report_after_finished(info, new_file_abspath):
     print(">>> " + new_file_abspath)
     new_file_size = os.stat(new_file_abspath).st_size
     print(
-        f">>> {new_file_size/int(info['File size'].split()[0]) * 100:.0f}% increased in file size\n"
+        f">>> {new_file_size/int(info['File size'].split()[0]) * 100:.0f}% compared to the input file size\n"
     )
 
 
@@ -179,3 +183,8 @@ def prompt_file_path() -> List[str]:
 
 if __name__ == "__main__":
     exit(main())
+    # import time
+    # start = time.time()
+    # for _ in range(10):
+    #     main()
+    # print(f"{(time.time() - start)/10:.2f} seconds per iteration")
