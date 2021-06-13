@@ -41,17 +41,16 @@ def main():
         dpi = get_dpi_from_choice(sys.argv[1])
         pdf_paths = [f for f in sys.argv[2:] if f.endswith(".pdf")]
     else:
-        dpi = ask_for_inversion_mode()
-        pdf_paths = prompt_file_path()
-        print(pdf_paths[0])
-
         os.system("title PDF-ColorInverter")
         print(
-            "Disclaimer.\n"
+            "Disclaimer. The size of the resulting pdf can be ridiculously huge.\n"
             "The output pdf will be a pdf of images only.\n"
             "The texts and other things will become uninteractive.\n"
             'Not recommended to "chain" the inversion as file sizes will get bigger and bigger.\n'
         )
+        dpi = ask_for_inversion_mode()
+        pdf_paths = prompt_file_path()
+        print(pdf_paths[0])
 
     targeted_file_dir = os.path.dirname(pdf_paths[0])
     os.chdir(targeted_file_dir)
@@ -75,7 +74,10 @@ def main():
 
 def ask_for_inversion_mode():
     selected_choice = wait_key(
-        "1: First time inverting (3 to 20? times the size to preserve quality).\n2: Subsequent inverting (the size is roughly the same).\n3: Quality comes first (6 to ??? times the size)\n(1, 2)?: ",
+        "1: First time inverting.\n"
+        "2: Subsequent inverting (inverting back to original colours).\n"
+        "3: Quality comes first\n"
+        "(1, 2)?: ",
         end="",
     )
     print(selected_choice + "\n")
