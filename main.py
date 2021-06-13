@@ -1,10 +1,8 @@
-import io
 import os
 import sys
-import threading
 import tkinter as tk
 from tkinter import filedialog
-from typing import Dict, List
+from typing import List
 
 try:
     import img2pdf
@@ -16,7 +14,7 @@ except ImportError:
     os.system("pip install -r requirements.txt")
     os.execv(sys.argv[0], sys.argv)
 
-from utils import add_this_arg, explore, wait_key
+from utils import explore, wait_key
 
 MAIN_FILE_PATH = os.path.abspath(__file__)
 MAIN_FILE_DIR = os.path.dirname(MAIN_FILE_PATH)
@@ -25,38 +23,54 @@ POPPLER_PATH = os.path.join(
     MAIN_FILE_DIR, "dependencies\\poppler-21.03.0\\Library\\bin"
 )
 
+IS_USED_AS_LIB = len(sys.argv) > 1
+
 
 def main():
-    os.system("title PDF-ColorInverter")
-    print(
-        "Disclaimer.\n"
-        "The output pdf will be a pdf of images only.\n"
-        "The texts and other things will become uninteractive.\n"
-        'Not recommended to "chain" the inversion as file sizes will get bigger and bigger.\n'
-    )
-    dpi = ask_for_inversion_mode()
-    pdf_paths = prompt_file_path()
+    if IS_USED_AS_LIB:
+        # main.py 1 path_to_input.pdf ...
+        dpi = get_dpi_from_choice(sys.argv[1])
+        pdf_paths = sys.argv[2:]
+    else:
+        dpi = ask_for_inversion_mode()
+        pdf_paths = prompt_file_path()
+        print(pdf_paths[0])
+
+        os.system("title PDF-ColorInverter")
+        print(
+            "Disclaimer.\n"
+            "The output pdf will be a pdf of images only.\n"
+            "The texts and other things will become uninteractive.\n"
+            'Not recommended to "chain" the inversion as file sizes will get bigger and bigger.\n'
+        )
+
     targeted_file_dir = os.path.dirname(pdf_paths[0])
     os.chdir(targeted_file_dir)
     output_dir = os.path.join(os.getcwd(), "inverted pdf(s)")
-    print(f"---------> Inverting {len(pdf_paths)} pdf file(s).\n")
+    if not IS_USED_AS_LIB:
+        print(f"---------> Inverting {len(pdf_paths)} pdf file(s).\n")
 
     for pdf in pdf_paths:
         images_file_names: str = invert_pdf(pdf, output_dir, dpi)
         for file in images_file_names:
             os.remove(file)
 
-    if wait_key("Press F to open the output folder.").lower() == "f":
-        explore(output_dir)
+    if not IS_USED_AS_LIB:
+        if wait_key("Press F to open the output folder.").lower() == "f":
+            explore(output_dir)
 
 
 def ask_for_inversion_mode():
-    dpi = 100
     selected_choice = wait_key(
         "1: First time inverting (3x the size to preserve quality).\n2: Subsequent inverting (the size is roughly the same).\n3: Quality comes first (6x the size)\n(1, 2)?: ",
         end="",
     )
     print(selected_choice + "\n")
+    return get_dpi_from_choice(selected_choice)
+
+
+def get_dpi_from_choice(selected_choice: str):
+    dpi = 100
     if selected_choice == "1":
         dpi = 200
     elif selected_choice == "3":
@@ -66,17 +80,19 @@ def ask_for_inversion_mode():
 
 def invert_pdf(pdf_path: str, output_dir: str, dpi: int):
     _, file_name = os.path.split(pdf_path)
-    print(f'=> Inverting "{file_name}"')
-    print(">> Converting to images, this may take a while.")
+    if not IS_USED_AS_LIB:
+        print(f'=> Inverting "{file_name}"')
+        print(">> Converting to images, this may take a while.")
 
     info = pdfinfo_from_path(pdf_path, poppler_path=POPPLER_PATH)
     images_file_names = save_extracted_images_from_pdf(pdf_path, dpi, file_name, info)
     new_file_abspath = create_output_dir(file_name, output_dir)
-
-    print(">> Merging images back to pdf, this may take a while.")
+    if not IS_USED_AS_LIB:
+        print(">> Merging images back to pdf, this may take a while.")
 
     merge_images_to_pdf(new_file_abspath, images_file_names)
-    report_after_finished(info, new_file_abspath)
+    if not IS_USED_AS_LIB:
+        report_after_finished(info, new_file_abspath)
 
     return images_file_names
 
@@ -99,7 +115,8 @@ def save_extracted_images_from_pdf(pdf_path, dpi, file_name, info):
             PIL.ImageOps.invert(img).save(img_file_name, "PNG")
             images_file_names.append(img_file_name)
         count += number_of_images
-        print(f"> inverted {count}/{maxPages} images")
+        if not IS_USED_AS_LIB:
+            print(f"> inverted {count}/{maxPages} images")
     return images_file_names
 
 
