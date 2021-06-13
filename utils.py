@@ -1,6 +1,5 @@
 import os
 import subprocess
-from typing import List
 
 if os.name == "nt":
     import msvcrt
@@ -8,15 +7,6 @@ else:
     import termios
 
 FILEBROWSER_PATH = os.path.join(os.getenv("WINDIR"), "explorer.exe")
-
-
-def combine_pdfs(pdf_list: List[str]) -> None:
-    # TODO converts 10 pages at a time to not monopolize the poor RAM
-    # see https://stackoverflow.com/questions/3444645/merge-pdf-files
-    # https://stackoverflow.com/questions/56471728/how-to-solve-memoryerror-using-python-3-7-pdf2image-library
-    # We have to split the pdfs and combine it.
-    # We cannot save all the images
-    return
 
 
 def explore(path):
@@ -54,10 +44,3 @@ def wait_key(prompt=None, end="\n"):
             termios.tcsetattr(fd, termios.TCSAFLUSH, oldterm)
 
     return result if type(result) == str else result.decode("utf-8")
-
-
-def add_this_arg(func):
-    def wrapped(*args, **kwargs):
-        return func(wrapped, *args, **kwargs)
-
-    return wrapped

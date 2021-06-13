@@ -58,6 +58,8 @@ def main():
     if not IS_USED_AS_LIB:
         if wait_key("Press F to open the output folder.").lower() == "f":
             explore(output_dir)
+    else:
+        return 5  # denoting a successful task
 
 
 def ask_for_inversion_mode():
@@ -162,4 +164,4 @@ def prompt_file_path() -> List[str]:
 
 
 if __name__ == "__main__":
-    main()
+    exit(main())
