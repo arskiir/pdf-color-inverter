@@ -111,10 +111,11 @@ def invert_pdf(pdf_path: str, output_dir: str, dpi: int):
 
 
 def save_extracted_images_from_pdf(pdf_path, dpi, file_name, info):
-    images_file_names = []
+    to_be_removed_images_file_names = []
     maxPages = info["Pages"]
     count = 0
     pages_converted_once = 10
+    base_temp_img_file_name = f"do not open - will be removed"
     for page in range(1, maxPages + 1, pages_converted_once):
         images: List[Image.Image] = convert_pdf_to_images(
             pdf_path,
@@ -124,13 +125,13 @@ def save_extracted_images_from_pdf(pdf_path, dpi, file_name, info):
         )
         number_of_images = len(images)
         for i, img in enumerate(images, count + 1):
-            img_file_name = f"{file_name.replace('.pdf', '')} {i} (will be removed).png"
-            PIL.ImageOps.invert(img).save(img_file_name, "PNG")
-            images_file_names.append(img_file_name)
+            temp_img_file_name = base_temp_img_file_name + f" {i}.png"
+            PIL.ImageOps.invert(img).save(temp_img_file_name, "PNG")
+            to_be_removed_images_file_names.append(temp_img_file_name)
         count += number_of_images
         if VERBOSE:
             print(f"> inverted {count}/{maxPages} images")
-    return images_file_names
+    return to_be_removed_images_file_names
 
 
 def merge_images_to_pdf(new_file_abspath, images_file_names):
