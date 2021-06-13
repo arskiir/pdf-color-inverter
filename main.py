@@ -100,7 +100,7 @@ def invert_pdf(pdf_path: str, output_dir: str, dpi: int):
         print(">> Converting to images, this may take a while.")
 
     info = pdfinfo_from_path(pdf_path, poppler_path=POPPLER_PATH)
-    images_file_names = save_extracted_images_from_pdf(pdf_path, dpi, file_name, info)
+    images_file_names = save_extracted_images_from_pdf(pdf_path, dpi, info)
     new_file_abspath = create_output_dir(file_name, output_dir)
     if VERBOSE:
         print(">> Merging images back to pdf, this may take a while.")
@@ -112,7 +112,7 @@ def invert_pdf(pdf_path: str, output_dir: str, dpi: int):
     return images_file_names
 
 
-def save_extracted_images_from_pdf(pdf_path, dpi, file_name, info):
+def save_extracted_images_from_pdf(pdf_path, dpi, info):
     to_be_removed_images_file_names = []
     maxPages = info["Pages"]
     count = 0
